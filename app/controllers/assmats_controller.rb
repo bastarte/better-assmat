@@ -1,0 +1,2 @@
+class AssmatsController < ApplicationController
+end
