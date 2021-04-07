@@ -10,9 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 2021_04_07_094002) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "assmats", force: :cascade do |t|
+    t.string "name"
+    t.string "address"
+    t.string "area"
+    t.date "last_update"
+    t.float "distance"
+    t.string "phone"
+    t.string "cell"
+    t.string "general_availability"
+    t.string "url"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "availabilities", force: :cascade do |t|
+    t.string "description"
+    t.string "details"
+    t.string "calendar"
+    t.bigint "assmat_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["assmat_id"], name: "index_availabilities_on_assmat_id"
+  end
+
+  add_foreign_key "availabilities", "assmats"
 end
