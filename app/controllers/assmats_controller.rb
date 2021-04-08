@@ -2,7 +2,7 @@ class AssmatsController < ApplicationController
   PREFIX = 'https://assmat.loire-atlantique.fr/'.freeze
 
   def index
-    # @assmats = Assmat.all
+    @assmats = Assmat.all.order(:name)
 
   end
 
@@ -25,10 +25,9 @@ class AssmatsController < ApplicationController
       call(attributes)
       # There is no information about being on the last page or not.
       # If we go loop until page 1000, the server will keep serving the last X results for each page we request
-      pp @assmat.name, Assmat.last.name
       break if @assmat.name != Assmat.last.name # not very safe if the last page has exactly 10 results
-      break if page >= 20 # guard clause
-      page += 10
+      break if page >= 18 # guard clause
+      page += 1
     end
   end
 
@@ -38,19 +37,20 @@ class AssmatsController < ApplicationController
     html_file = URI.parse(@url).open.read
     html_doc  = Nokogiri::HTML(html_file)
 
-    @assmats = []
     html_doc.search('.amcontainer').each do |amcontainer|
       data1   = amcontainer.search('.row-fluid')[0]
       data2   = amcontainer.search('.row-fluid')[1]
 
       @assmat = Assmat.new
       parse_data1(data1)
-      parse_data2(data2)
-      parse_subpage(@assmat.url)
-      # binding.pry
       break if Assmat.select(:name).map(&:name).include?(@assmat.name)
 
+      parse_data2(data2)
       @assmat.save!
+      parse_subpage(@assmat.url)
+      # binding.pry
+      pp Assmat.select(:name).map(&:name), (@assmat.name)
+
       pp @assmat
     end
     @assmat
@@ -106,7 +106,7 @@ class AssmatsController < ApplicationController
         details:      precision_dispo,
         calendar:     creneau_dispo,
       )
-      availability.save
+      availability.save!
     end
   end
 end

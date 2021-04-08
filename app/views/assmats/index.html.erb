@@ -1,3 +1,11 @@
-rgzrg
-<br><%= @url %>
-rgzrg
+<div class="container">
+  <table class= "table">
+    <% @assmats.each do |assmat| %>
+    <tr>
+      <td><%= assmat.name %></td>
+      <td><%= assmat.address %></td>
+      <td><%= assmat.distance %></td>
+    </tr>
+    <% end %>
+  </table>
+</div>
