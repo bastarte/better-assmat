@@ -22,14 +22,13 @@ class AssmatsController < ApplicationController
     page = 0
     loop do
       attributes = { start: page * 10 }
-      page += 1
       call(attributes)
       # There is no information about being on the last page or not.
       # If we go loop until page 1000, the server will keep serving the last X results for each page we request
       pp @assmat.name, Assmat.last.name
       break if @assmat.name != Assmat.last.name # not very safe if the last page has exactly 10 results
-      break if page >= 20
-
+      break if page >= 20 # guard clause
+      page += 10
     end
   end
 
@@ -47,7 +46,7 @@ class AssmatsController < ApplicationController
       @assmat = Assmat.new
       parse_data1(data1)
       parse_data2(data2)
-      # parse_subpage(@assmat[:url])
+      parse_subpage(@assmat.url)
       # binding.pry
       break if Assmat.select(:name).map(&:name).include?(@assmat.name)
 
@@ -82,20 +81,16 @@ class AssmatsController < ApplicationController
     html_file = URI.parse(url).open.read
 
     li = Nokogiri::HTML(html_file).css('.listeDispos li')
-    line = 1
     li.each_with_index do |dispo, index|
       next unless (index % 3).zero? # after each li with data, there are 2 lis with nothing interesting
 
       # get availability details
       cr_dispo        = dispo.at_css('p.crDispos') ? dispo.at_css('p.crDispos').text.strip : 'NC'
       precision_dispo = if dispo.at_css('div.precisionDispo p')
-                          dispo.at_css('div.precisionDispo p').text.strip.gsub(
-                            ',', '-'
-                          )
+                          dispo.at_css('div.precisionDispo p').text.strip.gsub(',', '-')
                         else
                           'Pas de précision'
                         end
-
       # get the full calendar, which is a big table of avail/not available timeslots.
       creneau_dispo = '|'
       dispo.search('tr td img').each_with_index do |creneau, index_creneau|
@@ -105,10 +100,13 @@ class AssmatsController < ApplicationController
         creneau_dispo << '|' if (creneau_dispo.size % 8).zero?
       end
 
-      # store availability details with a dynamic key name
-      storage_loc           = "dispos#{line}".to_sym
-      @assmat[storage_loc]  = "#{cr_dispo}***#{precision_dispo}***#{creneau_dispo}"
-      line += 1
+      availability = Availability.new(
+        assmat:       @assmat,
+        description:  cr_dispo,
+        details:      precision_dispo,
+        calendar:     creneau_dispo,
+      )
+      availability.save
     end
   end
 end
