@@ -7,6 +7,8 @@ class AssmatsController < ApplicationController
   end
 
   def refresh
+    Availability.delete_all
+    Assmat.delete_all
     import_from_web
 
     pp @assmats
@@ -18,12 +20,16 @@ class AssmatsController < ApplicationController
 
   def import_from_web
     page = 0
-    all_assmats = []
     loop do
       attributes = { start: page * 10 }
       page += 1
-      assmats = call(attributes)
-      assmats.last == all_assmats.last ? break : all_assmats += assmats
+      call(attributes)
+      # There is no information about being on the last page or not.
+      # If we go loop until page 1000, the server will keep serving the last X results for each page we request
+      pp @assmat.name, Assmat.last.name
+      break if @assmat.name != Assmat.last.name # not very safe if the last page has exactly 10 results
+      break if page >= 20
+
     end
   end
 
@@ -37,37 +43,39 @@ class AssmatsController < ApplicationController
     html_doc.search('.amcontainer').each do |amcontainer|
       data1   = amcontainer.search('.row-fluid')[0]
       data2   = amcontainer.search('.row-fluid')[1]
-      @assmat = {}
 
+      @assmat = Assmat.new
       parse_data1(data1)
       parse_data2(data2)
-      parse_subpage(@assmat[:url])
+      # parse_subpage(@assmat[:url])
+      # binding.pry
+      break if Assmat.select(:name).map(&:name).include?(@assmat.name)
 
-      @assmats << @assmat
+      @assmat.save!
       pp @assmat
     end
-    @assmats
+    @assmat
   end
 
   def parse_data1(data1)
-    @assmat[:name]        = data1.at_css('h2').text.strip
-    @assmat[:last_update] = data1.at_css('p').text.strip[-10..-1]
-    quartier              = data1.at_css('.quartier')
-    @assmat[:area]        = quartier ? quartier.text.strip[11..-1].split(' ').join(' ') : 'quartier inconnu'
-    @assmat[:distance]    = data1.text.strip.match(/à (?<dist>.{1,4}) km/)[:dist].gsub(',', '.').to_f
+    @assmat.name        = data1.at_css('h2').text.strip
+    @assmat.last_update = data1.at_css('p').text.strip[-10..-1]
+    quartier            = data1.at_css('.quartier')
+    @assmat.area        = quartier ? quartier.text.strip[11..-1].split(' ').join(' ') : 'quartier inconnu'
+    @assmat.distance    = data1.text.strip.match(/à (?<dist>.{1,4}) km/)[:dist].gsub(',', '.').to_f
   end
 
   def parse_data2(data2)
-    regexp2         = /((?<address>.*) (Tél fixe : (?<land>(\d)+)) Tél portable: (?<cell>.*) Courriel (?<available>.*) En savoir plus|(?<address>.+) Tél portable: (?<cell>.+) Courriel (?<available>.*) En savoir plus)/
-    data2_text      = data2.text.split(' ').join(' ')
+    regexp2         = /((?<address>.*) (Tél fixe : (?<phone>(\d)+)) Tél portable: (?<cell>.*) Courriel (?<available>.*) En savoir plus|(?<address>.+) Tél portable: (?<cell>.+) Courriel (?<available>.*) En savoir plus)/
+    data2_text      = data2.text.split.join(' ')
     contact_details = data2_text.match(regexp2) || {} # empty hash if nil
-    @assmat[:address]   = contact_details[:address] || 'NC'
-    @assmat[:land]      = contact_details[:land] || 'NC'
-    @assmat[:cell]      = contact_details[:cell] || 'NC'
-    @assmat[:available] = contact_details[:available] || 'NC'
+    @assmat.address = contact_details[:address] || 'NC'
+    @assmat.phone   = contact_details[:phone] || 'NC'
+    @assmat.cell    = contact_details[:cell] || 'NC'
+    @assmat.general_availability = contact_details[:available] || 'NC'
     # pp @assmat
 
-    @assmat[:url] = "#{PREFIX}#{data2.search('.wysiwyg a').attribute('href').value}"
+    @assmat.url = "#{PREFIX}#{data2.search('.wysiwyg a').attribute('href').value}"
   end
 
   def parse_subpage(url)
