@@ -8,7 +8,8 @@ class AssmatsController < ApplicationController
     @markers = @assmats.geocoded.map do |assmat|
       {
         lat: assmat.latitude,
-        lng: assmat.longitude
+        lng: assmat.longitude,
+        infoWindow: render_to_string(partial: "shared/info_window", locals: { assmat: assmat })
       }
     end
   end
