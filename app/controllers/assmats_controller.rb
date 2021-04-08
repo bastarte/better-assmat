@@ -2,8 +2,15 @@ class AssmatsController < ApplicationController
   PREFIX = 'https://assmat.loire-atlantique.fr/'.freeze
 
   def index
-    @assmats = Assmat.all.order(:name)
+    @assmats = Assmat.all.order(:distance)
 
+    # the `geocoded` scope filters only flats with coordinates (latitude & longitude)
+    @markers = @assmats.geocoded.map do |assmat|
+      {
+        lat: assmat.latitude,
+        lng: assmat.longitude
+      }
+    end
   end
 
   def refresh
@@ -26,7 +33,7 @@ class AssmatsController < ApplicationController
       # There is no information about being on the last page or not.
       # If we go loop until page 1000, the server will keep serving the last X results for each page we request
       break if @assmat.name != Assmat.last.name # not very safe if the last page has exactly 10 results
-      break if page >= 18 # guard clause
+      break if page >= 16 # guard clause
       page += 1
     end
   end
@@ -68,7 +75,7 @@ class AssmatsController < ApplicationController
     regexp2         = /((?<address>.*) (Tél fixe : (?<phone>(\d)+)) Tél portable: (?<cell>.*) Courriel (?<available>.*) En savoir plus|(?<address>.+) Tél portable: (?<cell>.+) Courriel (?<available>.*) En savoir plus)/
     data2_text      = data2.text.split.join(' ')
     contact_details = data2_text.match(regexp2) || {} # empty hash if nil
-    @assmat.address = contact_details[:address] || 'NC'
+    @assmat.address = contact_details[:address] || ''
     @assmat.phone   = contact_details[:phone] || 'NC'
     @assmat.cell    = contact_details[:cell] || 'NC'
     @assmat.general_availability = contact_details[:available] || 'NC'
@@ -101,10 +108,10 @@ class AssmatsController < ApplicationController
       end
 
       availability = Availability.new(
-        assmat:       @assmat,
-        description:  cr_dispo,
-        details:      precision_dispo,
-        calendar:     creneau_dispo,
+        assmat: @assmat,
+        description: cr_dispo,
+        details: precision_dispo,
+        calendar: creneau_dispo,
       )
       availability.save!
     end
