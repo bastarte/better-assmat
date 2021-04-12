@@ -11,6 +11,9 @@ class AssmatsController < ApplicationController
       ui = UserInput.find_by(user: @user, assmat: assmat)
       @user_inputs[assmat] = ui
     end
+  end
+
+  def patch_comment
 
   end
 
