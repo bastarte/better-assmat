@@ -3,15 +3,15 @@ class AssmatsController < ApplicationController
 
   def index
     @assmats = Assmat.all.order(:distance)
+    @user = current_user
+    @markers = make_markers
 
-    # the `geocoded` scope filters only flats with coordinates (latitude & longitude)
-    @markers = @assmats.geocoded.map do |assmat|
-      {
-        lat: assmat.latitude,
-        lng: assmat.longitude,
-        infoWindow: render_to_string(partial: "shared/info_window", locals: { assmat: assmat })
-      }
+    @user_inputs = {}
+    Assmat.joins(:user_inputs).each do |assmat|
+      ui = UserInput.find_by(user: @user, assmat: assmat)
+      @user_inputs[assmat] = ui
     end
+
   end
 
   def refresh
@@ -25,6 +25,17 @@ class AssmatsController < ApplicationController
   end
 
   private
+
+  def make_markers
+    # the `geocoded` scope filters only flats with coordinates (latitude & longitude)
+    @assmats.geocoded.map do |assmat|
+      {
+        lat: assmat.latitude,
+        lng: assmat.longitude,
+        infoWindow: render_to_string(partial: "shared/info_window", locals: { assmat: assmat })
+      }
+    end
+  end
 
   def import_from_web
     page = 0

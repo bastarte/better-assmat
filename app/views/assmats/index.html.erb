@@ -11,6 +11,14 @@
       <td><%= assmat.name %></td>
       <td><%= assmat.address %></td>
       <td><%= assmat.distance %></td>
+      <% if @user_inputs[assmat] %>
+        <td><%= @user_inputs[assmat].comment %></td>
+        <td><%= @user_inputs[assmat].selected %></td>
+      <% else %>
+        <td></td>
+        <td></td>
+      <% end %>
+
     </tr>
     <% end %>
   </table>
