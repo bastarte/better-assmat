@@ -19,8 +19,8 @@
             <%= f.submit "Update" %>
           <% end %>
         </td>
-        <!-- A cool option would be to use f.association to avoid creating the @user_inputs hash.
-          However, it put even more stuff on the Assmat controller. So we'll directly use user_inputs instead.
+        <!-- A cool option would be to use f.association to avoid creating the @user_inputs hash (cf below)
+          However, it put even more stuff on the Assmat controller. So we'll directly use user_inputs instead (cf above).
         <td><%= simple_form_for assmat do |f| %>
             <%= f.association :user_inputs, label_method: :comment, value_method: :selected, as: :check_boxes %>
             <%= f.submit "Update" %>
