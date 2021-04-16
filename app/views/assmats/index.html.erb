@@ -12,13 +12,14 @@
       <td><%= assmat.address %></td>
       <td><%= assmat.distance %></td>
       <% if @user_inputs[assmat] %>
-        <td><%= @user_inputs[assmat].comment %></td>
-        <td><%= @user_inputs[assmat].selected %></td>
-        <td><%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
-            <%= f.input :comment %>
-            <%= f.submit "Update" %>
+        <td  id="assmat-comment" ><%= @user_inputs[assmat].comment %><br><a href="" id="edit-comment">edit</a></td>
+        <td id="assmat-form"class="hidden"><%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
+          <%= f.input :comment %>
+          <%= f.input :selected, label: "En favoris" %>
+          <%= f.submit "Update" %>
           <% end %>
         </td>
+        <td><%= @user_inputs[assmat].selected %></td>
         <!-- A cool option would be to use f.association to avoid creating the @user_inputs hash (cf below)
           However, it put even more stuff on the Assmat controller. So we'll directly use user_inputs instead (cf above).
         <td><%= simple_form_for assmat do |f| %>
