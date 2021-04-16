@@ -12,8 +12,8 @@
       <td><%= assmat.address %></td>
       <td><%= assmat.distance %></td>
       <% if @user_inputs[assmat] %>
-        <td  id="assmat-comment" ><%= @user_inputs[assmat].comment %><br><a href="" id="edit-comment">edit</a></td>
-        <td id="assmat-form"class="hidden"><%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
+        <td class="assmat-comment" ><%= @user_inputs[assmat].comment %><br><a href="" class="edit-comment">edit</a></td>
+        <td class="assmat-form hidden"><%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
           <%= f.input :comment %>
           <%= f.input :selected, label: "En favoris" %>
           <%= f.submit "Update" %>
@@ -29,7 +29,7 @@
         </td>
         -->
       <% else %>
-        <td></td>
+        <td  class="assmat-comment" ><%= link_to "new", user_inputs_create_path(assmat: assmat) %></td>
         <td></td>
       <% end %>
 

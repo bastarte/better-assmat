@@ -1,7 +1,7 @@
 const loadForm = () => {
-  const edit = document.getElementById("edit-comment");
-  const assmatComment = document.getElementById("assmat-comment");
-  const assmatForm = document.getElementById("assmat-form");
+  const edit = document.querySelector(".edit-comment");
+  const assmatComment = document.querySelector(".assmat-comment");
+  const assmatForm = document.querySelector(".assmat-form");
   console.log(edit);
 
   edit.addEventListener("click", (event) => {
@@ -11,7 +11,6 @@ const loadForm = () => {
 
   assmatComment.classList.toggle("hidden");
   assmatForm.classList.toggle("hidden");
-
   });
 };
 
