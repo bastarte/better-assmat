@@ -11,27 +11,25 @@
       <td><%= assmat.name %></td>
       <td><%= assmat.address %></td>
       <td><%= assmat.distance %></td>
-      <% if @user_inputs[assmat] %>
-        <td><%= @user_inputs[assmat].comment %></td>
-        <td><%= @user_inputs[assmat].selected %></td>
-        <td><%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
-            <%= f.input :comment %>
-            <%= f.submit "Update" %>
-          <% end %>
-        </td>
-        <!-- A cool option would be to use f.association to avoid creating the @user_inputs hash.
-          However, it put even more stuff on the Assmat controller. So we'll directly use user_inputs instead.
-        <td><%= simple_form_for assmat do |f| %>
-            <%= f.association :user_inputs, label_method: :comment, value_method: :selected, as: :check_boxes %>
-            <%= f.submit "Update" %>
-          <% end %>
-        </td>
-        -->
-      <% else %>
-        <td></td>
-        <td></td>
-      <% end %>
-
+      <td>
+        <% if @user_inputs[assmat] %>
+          <div class="user-input">
+            <div class="read">
+              <span><%= @user_inputs[assmat].comment %></span><br>
+              <a href="" class="edit-comment" data-assmat-id="<%= assmat.id %>">edit</a>
+            </div>
+            <div class="write hidden">
+              <%= simple_form_for [@user_inputs[assmat]], remote: true do |f| %>
+              <%= f.input :comment %>
+              <%= f.input :selected, label: "En favoris" %>
+              <%= f.submit "Update" %>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <%= link_to "new", user_inputs_create_path(assmat: assmat) %>
+        <% end %>
+      </td>
     </tr>
     <% end %>
   </table>
