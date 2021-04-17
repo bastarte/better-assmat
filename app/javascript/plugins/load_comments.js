@@ -1,16 +1,18 @@
 const loadForm = () => {
-  const edit = document.querySelector(".edit-comment");
-  const assmatComment = document.querySelector(".assmat-comment");
-  const assmatForm = document.querySelector(".assmat-form");
-  console.log(edit);
+  // select all user-input div
+  const userInputs = document.querySelectorAll(".user-input");
 
-  edit.addEventListener("click", (event) => {
-  event.preventDefault();
-  console.log(event);
-  console.log(event.currentTarget);
+  // for each user-input div
+  userInputs.forEach((userInput) => {
+    const edit = userInput.querySelector(".edit-comment");
+    const read = userInput.querySelector(".read");
+    const write = userInput.querySelector(".write");
 
-  assmatComment.classList.toggle("hidden");
-  assmatForm.classList.toggle("hidden");
+    edit.addEventListener("click", (event) => {
+      event.preventDefault();
+      read.classList.toggle("hidden");
+      write.classList.toggle("hidden");
+    });
   });
 };
 
